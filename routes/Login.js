@@ -1,8 +1,58 @@
-const express=require("express");
-const router=express.Router();
+const express = require("express");
+const router = express.Router();
+const UserModel = require("../models/UserModel");
+const EmployerModel = require("../models/EmployerModel");
+const bcrypt = require("bcrypt");
+const { validationResult, body } = require("express-validator");
+const validationTestCases = [body("email").isEmail().withMessage("Invalid email!")];
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
-router.get("/",(req,res)=>{
-    res.json({name:"shreeram"})
-})
+router.post("/", validationTestCases, async (req, res) => {
+   //-------Perform some validation--------------
+   let validationErrors = validationResult(req);
+   if (validationErrors.length > 0) {
+      return res.status(400).json({ msg: validationErrors[0].msg });
+   }
+   const { email, password, isEmployer } = req.body;
+   if (!email || !password) {
+      return res.status(400).json({ msg: "Email and Password must be provided" });
+   }
 
-module.exports=router;
+   //----------------Fetch and see if user's/employer's email and password is correct----
+   try {
+      let response;
+      if (isEmployer) {
+         response = await EmployerModel.find({ email: { $eq: email } });
+      } else {
+         response = await UserModel.find({ email: { $eq: email } });
+      }
+      if (response.length > 0) {
+         bcrypt.compare(password, response[0].password, (err, verified) => {
+            if (err) {
+               console.log(err);
+               return res.status(500).json({ msg: "Internal server error" });
+            }
+            if (verified) {
+               //If verified, then send a jwt token
+               let token = jwt.sign({ uid: response[0]._id }, process.env.JWT_PRIVATE_SIGN);
+               res.cookie("authToken", token, {
+                  httpOnly: true,
+                  sameSite: "None",
+                  secure: true,
+               });
+               res.status(200).json({ msg: "Login Success!" });
+            } else {
+               res.status(400).json({ msg: "Invalid email and password!" });
+            }
+         });
+      } else {
+         res.status(400).json({ msg: "Invalid email!" });
+      }
+   } catch (error) {
+      console.log(error);
+      res.status(500).json({ msg: "Internal server error" });
+   }
+});
+
+module.exports = router;
