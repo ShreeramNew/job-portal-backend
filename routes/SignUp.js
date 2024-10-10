@@ -5,7 +5,7 @@ const UserModel = require("../models/UserModel");
 const EmployerModel = require("../models/EmployerModel");
 const jwt = require("jsonwebtoken");
 const { validationResult, body } = require("express-validator");
-require('dotenv').config();
+require("dotenv").config();
 
 const validationTestCases = [body("email").isEmail().withMessage("Provide a valid email")];
 
@@ -27,13 +27,14 @@ router.post("/", validationTestCases, passwordHasher, async (req, res) => {
          response = await UserModel.create([{ email, password }]);
       }
       //----------------create JWT token and send it as cookie------------
-      let token = jwt.sign({uid:response[0]._id},process.env.JWT_PRIVATE_SIGN);
-      res.cookie("authToken",token,{
-         httpOnly:true,
-         sameSite:"None",
-         secure:true
-      })
-      res.status(200).json({msg:"SignUp successfull"});
+      let token = jwt.sign({ uid: response[0]._id }, process.env.JWT_PRIVATE_SIGN);
+      res.cookie("authToken", token, {
+         httpOnly: true,
+         sameSite: "None",
+         secure: true,
+         path: "/",
+      });
+      res.status(200).json({ msg: "SignUp successfull" });
    } catch (error) {
       console.log(error);
       if (error.code === 11000) {

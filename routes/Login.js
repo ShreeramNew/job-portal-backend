@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const UserModel = require("../models/UserModel");
 const EmployerModel = require("../models/EmployerModel");
+const CompanyDetailsModel=require("../models/CompanyDetails");
 const bcrypt = require("bcrypt");
 const { validationResult, body } = require("express-validator");
 const validationTestCases = [body("email").isEmail().withMessage("Invalid email!")];
@@ -28,7 +29,8 @@ router.post("/", validationTestCases, async (req, res) => {
          response = await UserModel.find({ email: { $eq: email } });
       }
       if (response.length > 0) {
-         bcrypt.compare(password, response[0].password, (err, verified) => {
+         //Verify the password
+         bcrypt.compare(password, response[0].password, async (err, verified) => {
             if (err) {
                console.log(err);
                return res.status(500).json({ msg: "Internal server error" });
@@ -40,8 +42,13 @@ router.post("/", validationTestCases, async (req, res) => {
                   httpOnly: true,
                   sameSite: "None",
                   secure: true,
+                  path:"/"
                });
-               res.status(200).json({ msg: "Login Success!" });
+               //Check if onboarding is required or already done
+               let isOnboardingRequired=await CheckOnboardingRequired(response[0]._id,isEmployer)
+               console.log(isOnboardingRequired);
+               
+               res.status(200).json({ msg: "Login Success!",isOnboardingRequired });
             } else {
                res.status(400).json({ msg: "Invalid email and password!" });
             }
@@ -55,4 +62,12 @@ router.post("/", validationTestCases, async (req, res) => {
    }
 });
 
+
+const CheckOnboardingRequired=async (id,isEmployer)=>{
+   let result;
+   if(isEmployer){
+      result=await CompanyDetailsModel.find({employerId:{$eq:id}});
+   }
+   return result.length===0;
+}
 module.exports = router;
