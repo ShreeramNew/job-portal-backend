@@ -4,6 +4,8 @@ const jwt = require("jsonwebtoken");
 const router = express.Router();
 require("dotenv").config();
 
+
+//----------------------Post a new Job------------------------
 router.post("/", async (req, res) => {
    let authToken = req.cookies.authToken;
    if (authToken) {
@@ -32,6 +34,8 @@ router.post("/", async (req, res) => {
    }
 });
 
+
+//---------------------Fetch highlight of all posted job--------------------------
 router.get("/", async (req, res) => {
    let authToken = req.cookies.authToken;
    if (authToken) {
