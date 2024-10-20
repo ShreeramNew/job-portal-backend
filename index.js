@@ -23,6 +23,8 @@ app.use("/api/getJobs/employer",require("./routes/jobs/PostJob"));
 
 //---------------Patch Requests--------------------
 app.use("/api/editProfile/employer", require("./routes/profile/employer"));
+app.use("/api/EditJobDetails", require("./routes/jobs/PerticularJob"));
+
 
 
 //----------------Get Requests----------------------

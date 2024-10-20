@@ -30,16 +30,20 @@ router.patch("/", async (req, res) => {
    let cookie = req.cookies;
    if (cookie.authToken) {
       let payload = jwt.verify(cookie.authToken, process.env.JWT_PRIVATE_SIGN);
-      try {
-         let response = await CompanyDetailsModel.findOneAndUpdate(
-            { employerId: payload.uid },
-            req.body,
-            { new: true, runValidators: true }
-         );
-         res.status(200).json({ msg: "Saved!", response });
-      } catch (error) {
-         console.log(error);
-         res.status(500).json({ msg: "Something went wrong" });
+      if (payload.uid) {
+         try {
+            let response = await CompanyDetailsModel.findOneAndUpdate(
+               { employerId: payload.uid },
+               req.body,
+               { new: true, runValidators: true }
+            );
+            res.status(200).json({ msg: "Saved!", response });
+         } catch (error) {
+            console.log(error);
+            res.status(500).json({ msg: "Something went wrong" });
+         }
+      } else {
+         res.status(500).json({ msg: "Unauthorized access!" });
       }
    } else {
       res.status(500).json({ msg: "Unauthorized access!" });
@@ -53,7 +57,7 @@ router.get("/", async (req, res) => {
       let payload = jwt.verify(cookie.authToken, process.env.JWT_PRIVATE_SIGN);
       try {
          let response = await CompanyDetailsModel.find({ employerId: payload.uid });
-         res.status(200).json({ msg: "Success!", profile:response[0] });
+         res.status(200).json({ msg: "Success!", profile: response[0] });
       } catch (error) {
          console.log(error);
          res.status(500).json({ msg: "Something went wrong" });
