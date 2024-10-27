@@ -47,7 +47,7 @@ const uploadFilesToFireBase = async (file, destination) => {
    return `https://storage.googleapis.com/${bucket.name}/${destination}`;
 };
 
-//--------------------------To upload profile pic------------------------
+//--------------------------To upload profile pic-------------------------
 router.post("/profilePic", upload.single("profilePic"), async (req, res) => {
    try {
       const files = req.files;
