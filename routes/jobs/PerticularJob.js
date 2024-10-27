@@ -18,6 +18,7 @@ router.get("/", async (req, res) => {
          ...response._doc,
          company: CompanyDetailsResponse.companyName,
          postedOn: postedTimeStamp,
+         applicants:30,
       };
       res.status(200).json({ msg: "Suceess!", jobDetails: result });
    } catch (error) {
@@ -48,5 +49,26 @@ router.patch("/", async (req, res) => {
    }
 });
 
+
+//-----------------------Delete Job-------------------------------------
+router.delete("/", async (req, res) => {
+   let cookies = req.cookies;
+   let jobId = req.query.jobId;
+   console.log(jobId);
+   
+   if (cookies.authToken) {
+      let payload = jwt.verify(cookies.authToken, process.env.JWT_PRIVATE_SIGN);
+      if (payload.uid) {
+         try {
+            let response = await JobsModel.findByIdAndDelete(jobId);
+            res.status(200).json({ msg: "Deleted Successfully!", response });
+         } catch (error) {
+            res.status(500).json({ msg: "Internal Server Error", error });
+         }
+      }
+   } else {
+      res.status(400).json({ msg: "Unauthorised access!" });
+   }
+});
 module.exports = router;
 

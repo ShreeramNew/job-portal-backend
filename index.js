@@ -17,20 +17,21 @@ app.use(express.json());
 //-------------Post Requests----------------------
 app.use("/api/login", require("./routes/Login"));
 app.use("/api/signup", require("./routes/SignUp"));
-app.use("/api/onboarding/employer",require("./routes/profile/employer"));
-app.use("/api/postJob",require("./routes/jobs/PostJob"));
-app.use("/api/getJobs/employer",require("./routes/jobs/PostJob"));
+app.use("/api/onboarding/employer", require("./routes/profile/employer"));
+app.use("/api/postJob", require("./routes/jobs/PostJob"));
+app.use("/api/getJobs/employer", require("./routes/jobs/PostJob"));
+app.use("/api/onboarding/user", require("./routes/profile/user"));
 
 //---------------Patch Requests--------------------
 app.use("/api/editProfile/employer", require("./routes/profile/employer"));
 app.use("/api/EditJobDetails", require("./routes/jobs/PerticularJob"));
 
-
-
 //----------------Get Requests----------------------
 app.use("/api/getProfile/employer", require("./routes/profile/employer"));
 app.use("/api/getJobDetails", require("./routes/jobs/PerticularJob"));
 
+//----------------Delete Requests-------------------
+app.use("/api/deleteJob", require("./routes/jobs/PerticularJob"));
 
 app.listen(port, () => {
    console.log("Ready to listen!");

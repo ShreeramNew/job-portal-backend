@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const CompanyDetailsModel = require("../../models/CompanyDetails");
+const EmployerModel = require("../../models/EmployerModel");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
@@ -52,12 +53,19 @@ router.patch("/", async (req, res) => {
 
 //--------------------------Used to get the current profile details------------------
 router.get("/", async (req, res) => {
-   let cookie = req.cookies;
-   if (cookie.authToken) {
-      let payload = jwt.verify(cookie.authToken, process.env.JWT_PRIVATE_SIGN);
+   let empId = req.query.empId;
+   console.log(empId);
+
+   if (empId) {
       try {
-         let response = await CompanyDetailsModel.find({ employerId: payload.uid });
-         res.status(200).json({ msg: "Success!", profile: response[0] });
+         let response = await CompanyDetailsModel.findOne({ employerId: empId });
+         let employerDeatilResoponse = await EmployerModel.findById(empId);
+         console.log(employerDeatilResoponse.email);
+         console.log(response);
+         res.status(200).json({
+            msg: "Success is good!",
+            profile: { ...response._doc, email: employerDeatilResoponse.email },
+         });
       } catch (error) {
          console.log(error);
          res.status(500).json({ msg: "Something went wrong" });
