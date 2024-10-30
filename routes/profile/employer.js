@@ -22,7 +22,7 @@ router.post("/", async (req, res) => {
          res.status(500).json({ msg: "Something went wrong" });
       }
    } else {
-      res.status(500).json({ msg: "Unauthorized access!" });
+      res.status(401).json({ msg: "Unauthorized access!" });
    }
 });
 
@@ -47,7 +47,7 @@ router.patch("/", async (req, res) => {
          res.status(500).json({ msg: "Unauthorized access!" });
       }
    } else {
-      res.status(500).json({ msg: "Unauthorized access!" });
+      res.status(401).json({ msg: "Unauthorized access!" });
    }
 });
 
@@ -71,7 +71,7 @@ router.get("/", async (req, res) => {
          res.status(500).json({ msg: "Something went wrong" });
       }
    } else {
-      res.status(500).json({ msg: "Unauthorized access!" });
+      res.status(401).json({ msg: "Unauthorized access!" });
    }
 });
 

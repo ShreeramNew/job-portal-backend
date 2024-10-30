@@ -2,6 +2,8 @@ const express = require("express");
 const multer = require("multer");
 const firebaseAdmin = require("firebase-admin");
 const router = express.Router();
+const ProfileModel = require("../../models/UserProfile");
+const GetUid = require("../../middlewares/GetUid");
 require("dotenv").config();
 
 firebaseAdmin.initializeApp({
@@ -48,41 +50,89 @@ const uploadFilesToFireBase = async (file, destination) => {
 };
 
 //--------------------------To upload profile pic-------------------------
-router.post("/profilePic", upload.single("profilePic"), async (req, res) => {
+router.post("/profilePic", GetUid, upload.single("profilePic"), async (req, res) => {
    try {
-      const files = req.files;
-      if (!files) {
-         return;
+      const file = req.file;
+      if (!file) {
+         return res.status(400).json({ msg: "File not set properly" });
       }
-      const profilePic = files["profilePic"] ? files["profilePic"][0] : null;
 
-      const profilePicURL = profilePic
-         ? await uploadFilesToFireBase(
-              profilePic,
-              `profilePics/${Date.now()}_${profilePic.originalname}`
-           )
-         : null;
-      res.status(200).json({ msg: "Saved to Firebase", profilePicURL, resumeURL });
+      //Check if the user has already saved some data
+      const user = await ProfileModel.findOne({ uid: req.uid });
+
+      if (user) {
+         if (user.profile) {
+            let oldProfilePic = user.profile.split(`${bucket.name}/`)[1];
+            //Delete the older profile pic
+            await bucket.file(oldProfilePic).delete();
+         }
+         //upload the new profile pic
+         const profilePicURL = file
+            ? await uploadFilesToFireBase(file, `profilePics/${Date.now()}_${file.originalname}`)
+            : null;
+
+         //Save the new profile pic link
+         let response = await ProfileModel.findOneAndUpdate(
+            { uid: req.uid },
+            { profile: profilePicURL },
+            { new: true }
+         );
+         res.status(200).json({ msg: "Profile picture updated!", profileDetails: response });
+      } else {
+         //Upload profile pic
+         const profilePicURL = file
+            ? await uploadFilesToFireBase(file, `profilePics/${Date.now()}_${file.originalname}`)
+            : null;
+
+         //Save profile pic link
+         const response = await ProfileModel.create([{ uid: req.uid, profile: profilePicURL }]);
+         res.status(200).json({ msg: "Profile picture saved", profileDetails: response });
+      }
    } catch (error) {
+      console.log(error);
       res.status(500).json({ msg: "Internal Server Error" });
    }
 });
 
 //-----------------------------To upload Resume------------------------
-router.post("/resume", upload.single("resume"), async (req, res) => {
+router.post("/resume", GetUid, upload.single("resume"), async (req, res) => {
    try {
-      const files = req.files;
-      if (!files) {
-         return;
+      const file = req.file;
+      if (!file) {
+         return res.status(400).json({ msg: "File not set properly" });
       }
-      const resume = files["resume"] ? files["resume"][0] : null;
 
-      const resumeURL = resume
-         ? await uploadFilesToFireBase(resume, `resumes/${Date.now()}_${resume.originalname}`)
-         : null;
-      res.status(200).json({ msg: "Saved to Firebase", profilePicURL, resumeURL });
+      //Check if the user has already saved some data
+      const user = await ProfileModel.findOne({ uid: req.uid });
+
+      if (user) {
+         if (user.resume) {
+            let oldResumeLink = user.resume.split(`${bucket.name}/`)[1];
+            await bucket.file(oldResumeLink).delete();
+         }
+         const resumeURL = file
+            ? await uploadFilesToFireBase(file, `resumes/${Date.now()}_${file.originalname}`)
+            : null;
+
+         //Save the new profile pic link
+         let response = await ProfileModel.findOneAndUpdate(
+            { uid: req.uid },
+            { resume: resumeURL },
+            { new: true }
+         );
+         res.status(200).json({ msg: "Resume updated!", profileDetails: response });
+      } else {
+         const resumeURL = file
+            ? await uploadFilesToFireBase(file, `resumes/${Date.now()}_${file.originalname}`)
+            : null;
+
+         //Save profile pic link
+         const response = await ProfileModel.create([{ uid: req.uid, resume: resumeURL }]);
+         res.status(200).json({ msg: "Resume saved", profileDetails: response });
+      }
    } catch (error) {
-      res.status(500).json({ msg: "Internal Server Error" });
+      console.log(error);
+      res.status(500).json({ msg: "Internal Server Error", error });
    }
 });
 

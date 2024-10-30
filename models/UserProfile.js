@@ -1,19 +1,20 @@
 const mongoose = require("mongoose");
 
 const ProfileSchema = new mongoose.Schema({
-   email: { type: String, required: true },
-   profile: { type: String, required: true },
-   resume: { type: String, required: true },
-   username: { type: String, required: true },
+   uid: { type: String, require: true },
+   email: { type: String },
+   profile: { type: String },
+   resume: { type: String },
+   username: { type: String },
    bio: { type: String },
-   education: { type: String, required: true },
-   experience: { type: String, required: true },
+   education: { type: String },
+   experience: { type: String },
    company: { type: String },
-   time: { type: number },
+   time: { type:Number },
    yearsOrMonth: { type: String },
-   phone: { type: number, required: true },
-   linkedin: { type: String, required: true },
-   gitHub: { type: String, required: true },
+   phone: { type: Number },
+   linkedin: { type: String },
+   gitHub: { type: String },
 });
 
 module.exports = mongoose.model("userProfile", ProfileSchema);

@@ -21,6 +21,8 @@ app.use("/api/onboarding/employer", require("./routes/profile/employer"));
 app.use("/api/postJob", require("./routes/jobs/PostJob"));
 app.use("/api/getJobs/employer", require("./routes/jobs/PostJob"));
 app.use("/api/onboarding/user", require("./routes/profile/user"));
+app.use("/api/onboarding/upload", require("./routes/profile/user"));
+
 
 //---------------Patch Requests--------------------
 app.use("/api/editProfile/employer", require("./routes/profile/employer"));

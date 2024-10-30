@@ -73,7 +73,9 @@ const CheckOnboardingRequired = async (id, isEmployer) => {
    let result;
    if (isEmployer) {
       result = await CompanyDetailsModel.find({ employerId: { $eq: id } });
+      return result.length === 0;
+   } else {
+      return true;
    }
-   return result.length === 0;
 };
 module.exports = router;
