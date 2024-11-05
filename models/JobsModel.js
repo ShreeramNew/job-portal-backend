@@ -5,6 +5,10 @@ const JobsSchema = new mongoose.Schema({
       type: String,
       required: true,
    },
+   company: {
+      type: String,
+      required: true,
+   },
    jobTitle: { type: String, required: true },
    jobType: { type: String, required: true },
    location: { type: String, required: true },
@@ -18,4 +22,5 @@ const JobsSchema = new mongoose.Schema({
    openings: { type: Number, required: true },
 });
 
+JobsSchema.index({ skills: "text", jobTitle: "text" });
 module.exports = mongoose.model("jobs", JobsSchema);

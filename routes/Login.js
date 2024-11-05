@@ -3,6 +3,7 @@ const router = express.Router();
 const UserModel = require("../models/UserModel");
 const EmployerModel = require("../models/EmployerModel");
 const CompanyDetailsModel = require("../models/CompanyDetails");
+const ProfileModel=require("../models/UserProfile");
 const bcrypt = require("bcrypt");
 const { validationResult, body } = require("express-validator");
 const validationTestCases = [body("email").isEmail().withMessage("Invalid email!")];
@@ -54,7 +55,7 @@ router.post("/", validationTestCases, async (req, res) => {
                res.status(200).json({
                   msg: "Login Success!",
                   isOnboardingRequired,
-                  employerId: response[0]._id,
+                  uid: response[0]._id,
                });
             } else {
                res.status(400).json({ msg: "Invalid email and password!" });
@@ -75,7 +76,8 @@ const CheckOnboardingRequired = async (id, isEmployer) => {
       result = await CompanyDetailsModel.find({ employerId: { $eq: id } });
       return result.length === 0;
    } else {
-      return true;
+      result = await ProfileModel.find({ uid: { $eq: id } });
+      return result.length === 0;
    }
 };
 module.exports = router;

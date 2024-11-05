@@ -15,7 +15,7 @@ router.post("/", async (req, res) => {
          employerId: payload.uid,
       };
       try {
-         await companyDetails.create(DataToSave);
+         await CompanyDetailsModel.create(DataToSave);
          res.status(200).json({ msg: "Success!" });
       } catch (error) {
          console.log(error);
