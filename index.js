@@ -10,11 +10,12 @@ const port = process.env.PORT;
 
 //-----------------------------------Middlewares----------------------------------------
 app.use(cookieParser());
-app.use(cors({ origin: "http://localhost:3001", credentials: true }));
+
+app.use(cors({ origin: ["http://localhost:3001", "http://192.168.1.5:3001"], credentials: true }));
 app.use(express.json());
 
 app.listen(port, () => {
-   console.log("Ready to listen!");
+   console.log(`Server is running on port ${port}`);
 });
 
 //=====================================All endpoints=====================================
@@ -31,6 +32,7 @@ app.use("/api/upload", require("./routes/upload/Upload"));
 //-----------------------------------Patch Requests---------------------------------------
 app.use("/api/editProfile/employer", require("./routes/profile/employer"));
 app.use("/api/EditJobDetails", require("./routes/jobs/PerticularJob"));
+app.use("/api/applyForJob", require("./routes/jobs/ApplyForJob"));
 
 //-----------------------------------Get Requests-----------------------------------------
 app.use("/api/getProfile/employer", require("./routes/profile/employer"));

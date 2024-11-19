@@ -54,14 +54,11 @@ router.patch("/", async (req, res) => {
 //--------------------------Used to get the current profile details------------------
 router.get("/", async (req, res) => {
    let empId = req.query.empId;
-   console.log(empId);
 
    if (empId) {
       try {
          let response = await CompanyDetailsModel.findOne({ employerId: empId });
          let employerDeatilResoponse = await EmployerModel.findById(empId);
-         console.log(employerDeatilResoponse.email);
-         console.log(response);
          res.status(200).json({
             msg: "Success is good!",
             profile: { ...response._doc, email: employerDeatilResoponse.email },

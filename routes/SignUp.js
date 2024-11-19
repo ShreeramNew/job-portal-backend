@@ -34,7 +34,7 @@ router.post("/", validationTestCases, passwordHasher, async (req, res) => {
          secure: true,
          path: "/",
       });
-      res.status(200).json({ msg: "SignUp successfull", employerId: response[0]._id });
+      res.status(200).json({ msg: "SignUp successfull", uid: response[0]._id });
    } catch (error) {
       console.log(error);
       if (error.code === 11000) {

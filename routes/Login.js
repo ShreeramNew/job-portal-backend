@@ -50,7 +50,6 @@ router.post("/", validationTestCases, async (req, res) => {
                   response[0]._id,
                   isEmployer
                );
-               console.log(isOnboardingRequired);
 
                res.status(200).json({
                   msg: "Login Success!",

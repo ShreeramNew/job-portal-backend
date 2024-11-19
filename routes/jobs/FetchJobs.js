@@ -7,7 +7,6 @@ router.get("/search", async (req, res) => {
    let searchString = req.query.q;
    try {
       let AllJobs = await JobsModel.find({ $text: { $search: searchString } });
-
       let resultToSend = AllJobs.map((job) => {
          return {
             ...job._doc,
@@ -51,7 +50,6 @@ router.get("/similarJobs", async (req, res) => {
          currentJobSkills.forEach((skill) => {
             if (JobsSkillArray.includes(skill)) {
                temp = 1;
-               console.log(skill, JobsSkillArray);
             }
          });
          return temp == 1;
@@ -71,4 +69,21 @@ router.get("/similarJobs", async (req, res) => {
    }
 });
 
+//-----------------------Get jobs based on filters-----------------------------
+router.post("/", async (req, res) => {
+   let filters = req.body.filters;
+   let experience = filters.experience;
+   let location = filters.location;
+   let salary = filters.salary;
+   if (salary.length > 0) {
+      let SortedSalary = salary.sort((a, b) => a - b);
+      let minSalary = SortedSalary[0];
+      let maxSalary = SortedSalary[salary.length - 1];
+      let response = await JobsModel.find({
+         $and: [{ minSalary: { $gte: minSalary } }, { maxSalary: { $lte: maxSalary } }],
+      });
+      res.status(200).json({ msg: "Success!", response });
+   }
+   // res.status(200).json({ msg: "Success!", filters });
+});
 module.exports = router;
