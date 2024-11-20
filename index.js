@@ -33,12 +33,16 @@ app.use("/api/upload", require("./routes/upload/Upload"));
 app.use("/api/editProfile/employer", require("./routes/profile/employer"));
 app.use("/api/EditJobDetails", require("./routes/jobs/PerticularJob"));
 app.use("/api/applyForJob", require("./routes/jobs/ApplyForJob"));
+app.use("/api/saveApplicants", require("./routes/jobs/Applicants"));
+
 
 //-----------------------------------Get Requests-----------------------------------------
 app.use("/api/getProfile/employer", require("./routes/profile/employer"));
 app.use("/api/getJobDetails", require("./routes/jobs/PerticularJob"));
 app.use("/api/getProfile/user", require("./routes/profile/user"));
 app.use("/api/getJobs", require("./routes/jobs/FetchJobs"));
+app.use("/api/getApplicants", require("./routes/jobs/Applicants"));
+
 
 //-----------------------------------Delete Requests---------------------------------------
 app.use("/api/deleteJob", require("./routes/jobs/PerticularJob"));

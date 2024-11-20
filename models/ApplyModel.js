@@ -9,6 +9,10 @@ const ApplySchema = new mongoose.Schema({
       type: [String],
       default: [],
    },
+   savedApplicants: {
+      type: [String],
+      default: [],
+   },
 });
 
 module.exports = mongoose.model("applicants", ApplySchema);

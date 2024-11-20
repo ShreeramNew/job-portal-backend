@@ -2,10 +2,15 @@ const express = require("express");
 const router = express.Router();
 const GetUid = require("../../middlewares/GetUid");
 const ApplyModel = require("../../models/ApplyModel");
+const UserModel = require("../../models/UserModel");
 
 router.patch("/", GetUid, async (req, res) => {
    let jobId = req.body.jobId;
    try {
+      let user = await UserModel.findById(req.uid);
+      if (!user) {
+         return res.status(401).json({ msg: "Unauthorized accesss!" });
+      }
       let response = await ApplyModel.find({ jobId });
       let newResponse;
       if (response.length > 0) {

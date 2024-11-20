@@ -2,6 +2,7 @@ const express = require("express");
 const JobModel = require("../../models/JobsModel");
 const CompanyDeatils = require("../../models/CompanyDetails");
 const GetUid = require("../../middlewares/GetUid");
+const ApplyModel = require("../../models/ApplyModel");
 const jwt = require("jsonwebtoken");
 const router = express.Router();
 require("dotenv").config();
@@ -29,19 +30,30 @@ router.get("/", GetUid, async (req, res) => {
    //Fetch the jobs
    let response = await JobModel.find({ employerId: { $eq: req.uid } }).lean();
 
-   let ResponseToSend = response.map((job) => {
-      let postedTimeStamp = new Date(job._id.getTimestamp());
-      let postedDate = postedTimeStamp.toLocaleDateString();
-      postedTimeStamp.setDate(postedTimeStamp.getDate() + 30);
-      let newResult = {
-         jobId: job._id,
-         title: job.jobTitle,
-         applicants: 30,
-         postedOn: postedDate,
-         expiresOn: postedTimeStamp.toLocaleDateString(),
-      };
-      return newResult;
-   });
+   let ResponseToSend =await Promise.all(
+      response.map(async (job) => {
+         //-----------Find the number of applicants of that job---------
+         let result = await ApplyModel.findOne({ jobId: job._id });
+         // console.log(result);
+
+         let numberOfAppliacants = result ? result.applicants.length : 0;
+         // console.log(result);
+         console.log(numberOfAppliacants);
+
+         let postedTimeStamp = new Date(job._id.getTimestamp());
+         let postedDate = postedTimeStamp.toLocaleDateString();
+         postedTimeStamp.setDate(postedTimeStamp.getDate() + 30);
+
+         let newResult = {
+            jobId: job._id,
+            title: job.jobTitle,
+            applicants: numberOfAppliacants,
+            postedOn: postedDate,
+            expiresOn: postedTimeStamp.toLocaleDateString(),
+         };
+         return newResult;
+      })
+   );
    res.status(200).json({ msg: "Succcess!", jobs: ResponseToSend });
 });
 
