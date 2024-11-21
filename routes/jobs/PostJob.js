@@ -34,11 +34,8 @@ router.get("/", GetUid, async (req, res) => {
       response.map(async (job) => {
          //-----------Find the number of applicants of that job---------
          let result = await ApplyModel.findOne({ jobId: job._id });
-         // console.log(result);
-
          let numberOfAppliacants = result ? result.applicants.length : 0;
-         // console.log(result);
-         console.log(numberOfAppliacants);
+         let savedApplicants = result ? result.savedApplicants.length : 0;
 
          let postedTimeStamp = new Date(job._id.getTimestamp());
          let postedDate = postedTimeStamp.toLocaleDateString();
@@ -50,6 +47,7 @@ router.get("/", GetUid, async (req, res) => {
             applicants: numberOfAppliacants,
             postedOn: postedDate,
             expiresOn: postedTimeStamp.toLocaleDateString(),
+            savedApplicants
          };
          return newResult;
       })
