@@ -8,7 +8,7 @@ require("dotenv").config();
 
 firebaseAdmin.initializeApp({
    credential: firebaseAdmin.credential.cert(
-      require("../../jobnow-95279-firebase-adminsdk-t7sv8-9a9d469b9c.json")
+      require("../../firebase_admin_sdk.json")
    ),
    storageBucket: process.env.storageBucket,
 });
