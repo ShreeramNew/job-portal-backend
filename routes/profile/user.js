@@ -2,15 +2,44 @@ const express = require("express");
 const router = express.Router();
 const ProfileModel = require("../../models/UserProfile");
 const UserModel = require("../../models/UserModel");
+const Getuid = require("../../middlewares/GetUid");
 
 const GetUid = require("../../middlewares/GetUid");
 require("dotenv").config();
 
-router.get("/", async (req, res) => {
+router.get("/", GetUid, async (req, res) => {
+   let uid = req.uid;
+
+   try {
+      let user = await ProfileModel.findOne({ uid });
+      res.status(200).json({ msg: "Success!", user });
+   } catch (error) {
+      res.status(500).json({ msg: "Internal Server Error!" });
+   }
+});
+
+router.get("/perticularUser", async (req, res) => {
    let uid = req.query.uid;
    try {
       let user = await ProfileModel.findOne({ uid });
       res.status(200).json({ msg: "Success!", user });
+   } catch (error) {
+      res.status(500).json({ msg: "Internal Server Error!" });
+   }
+});
+
+router.get("/checkLogedIn", GetUid, async (req, res) => {
+   let uid = req.uid;
+   let cookie = req.cookies;
+
+   try {
+      let user = await ProfileModel.findOne({ uid });
+      let result = {
+         token: cookie.authToken,
+         profilePic: user.profile,
+         uid,
+      };
+      res.status(200).json({ msg: "Success!", result });
    } catch (error) {
       res.status(500).json({ msg: "Internal Server Error!" });
    }

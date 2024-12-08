@@ -3,7 +3,7 @@ const router = express.Router();
 const UserModel = require("../models/UserModel");
 const EmployerModel = require("../models/EmployerModel");
 const CompanyDetailsModel = require("../models/CompanyDetails");
-const ProfileModel=require("../models/UserProfile");
+const ProfileModel = require("../models/UserProfile");
 const bcrypt = require("bcrypt");
 const { validationResult, body } = require("express-validator");
 const validationTestCases = [body("email").isEmail().withMessage("Invalid email!")];
@@ -51,10 +51,17 @@ router.post("/", validationTestCases, async (req, res) => {
                   isEmployer
                );
 
+               let profilePic="";
+               if (!isOnboardingRequired) {
+                  let user = await ProfileModel.findOne({ uid: response[0]._id });
+                  profilePic=user.profile
+               }
+
                res.status(200).json({
                   msg: "Login Success!",
                   isOnboardingRequired,
                   uid: response[0]._id,
+                  profilePic
                });
             } else {
                res.status(400).json({ msg: "Invalid email and password!" });

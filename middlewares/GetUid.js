@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const getUid = async (req, res, next) => {
    let cookie = req.cookies;
+   
    if (cookie?.authToken) {
       try {
          let payload = jwt.verify(cookie.authToken, process.env.JWT_PRIVATE_SIGN);
