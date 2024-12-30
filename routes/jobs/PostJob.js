@@ -39,7 +39,7 @@ router.get("/", GetUid, async (req, res) => {
 
          let postedTimeStamp = new Date(job._id.getTimestamp());
          let postedDate = postedTimeStamp.toLocaleDateString();
-         postedTimeStamp.setDate(postedTimeStamp.getDate() + 30);
+         postedTimeStamp.setDate(postedTimeStamp.getDate() + 60);
 
          let newResult = {
             jobId: job._id,
