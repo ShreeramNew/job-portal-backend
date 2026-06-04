@@ -6,8 +6,10 @@ const ProfileModel = require("../../models/UserProfile");
 const GetUid = require("../../middlewares/GetUid");
 require("dotenv").config();
 
-firebaseAdmin.initializeApp({
-   credential: firebaseAdmin.credential.cert({
+// Initialize Firebase Admin only if not already initialized
+if (!firebaseAdmin.apps.length) {
+  firebaseAdmin.initializeApp({
+    credential: firebaseAdmin.credential.cert({
       type: process.env.FIREBASE_TYPE,
       project_id: process.env.FIREBASE_PROJECT_ID,
       private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
@@ -16,133 +18,133 @@ firebaseAdmin.initializeApp({
       client_id: process.env.FIREBASE_CLIENT_ID,
       auth_uri: process.env.FIREBASE_AUTH_URI,
       token_uri: process.env.FIREBASE_TOKEN_URI,
-      auth_provider_x509_cert_url: process.env.FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
+      auth_provider_x509_cert_url:
+        process.env.FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
       client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL,
-   }),
-   storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-});
+    }),
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  });
+}
 
 const bucket = firebaseAdmin.storage().bucket();
 
-// Configure Multer to store file in memory temporarily
+// Configure Multer to store file in memory
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
-
-//--------------------Function to save the file in Firebase bucket------
-const uploadFilesToFireBase = async (file, destination) => {
-   const blob = bucket.file(destination); // create a file in bucket,(initially it would be empty )
-
-   //Set up the writable stream (It acts as a pipe throw which we can pass the data to fill the blob(or file))
-   const blobStream = blob.createWriteStream({
-      metadata: {
-         contentType: file.mimetype,
-      },
-   });
-
-   //throw error if something wrong happens in further process
-   blobStream.on("error", () => {
-      throw new Error("Upload failed!");
-   });
-
-   blobStream.end(file.buffer); // Writes the data into the blob, using blobStream
-
-   //---Make sure that data is completely filled, and it is ready for access---
-   await new Promise((resolve, reject) => {
-      blobStream.on("finish", async () => {
-         await blob.makePublic();
-         resolve();
-      });
-   });
-
-   // Finally return the URL of that file
-   return `https://storage.googleapis.com/${bucket.name}/${destination}`;
-};
-
-//--------------------------To upload profile pic-------------------------
-router.post("/profilePic", GetUid, upload.single("profilePic"), async (req, res) => {
-   try {
-      const file = req.file;
-      if (!file) {
-         return res.status(400).json({ msg: "File not set properly" });
-      }
-
-      //Check if the user has already saved some data
-      const user = await ProfileModel.findOne({ uid: req.uid });
-
-      if (user) {
-         if (user.profile) {
-            let oldProfilePic = user.profile.split(`${bucket.name}/`)[1];
-            //Delete the older profile pic
-            await bucket.file(oldProfilePic).delete();
-         }
-         //upload the new profile pic
-         const profilePicURL = file
-            ? await uploadFilesToFireBase(file, `profilePics/${Date.now()}_${file.originalname}`)
-            : null;
-
-         //Save the new profile pic link
-         let response = await ProfileModel.findOneAndUpdate(
-            { uid: req.uid },
-            { profile: profilePicURL },
-            { new: true }
-         );
-         res.status(200).json({ msg: "Profile picture updated!", profileDetails: response });
-      } else {
-         //Upload profile pic
-         const profilePicURL = file
-            ? await uploadFilesToFireBase(file, `profilePics/${Date.now()}_${file.originalname}`)
-            : null;
-
-         //Save profile pic link
-         const response = await ProfileModel.create([{ uid: req.uid, profile: profilePicURL }]);
-         res.status(200).json({ msg: "Profile picture saved", profileDetails: response });
-      }
-   } catch (error) {
-      console.log(error);
-      res.status(500).json({ msg: "Internal Server Error" });
-   }
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
 });
 
-//-----------------------------To upload Resume------------------------
-router.post("/resume", GetUid, upload.single("resume"), async (req, res) => {
-   try {
+//--------------------Helper Function: Upload to Firebase-------------------------
+const uploadFilesToFireBase = (file, destination) => {
+  return new Promise((resolve, reject) => {
+    const blob = bucket.file(destination);
+    const blobStream = blob.createWriteStream({
+      metadata: {
+        contentType: file.mimetype,
+      },
+    });
+
+    // Use reject() instead of throw to prevent server crash
+    blobStream.on("error", (error) => {
+      console.error("Firebase upload error:", error);
+      reject(error);
+    });
+
+    blobStream.on("finish", async () => {
+      try {
+        // Make the file public so it's accessible via URL
+        await blob.makePublic();
+        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${destination}`;
+        resolve(publicUrl);
+      } catch (err) {
+        reject(err);
+      }
+    });
+
+    blobStream.end(file.buffer);
+  });
+};
+
+//--------------------------Route: Upload Profile Pic-------------------------
+router.post(
+  "/profilePic",
+  GetUid,
+  upload.single("profilePic"),
+  async (req, res) => {
+    try {
       const file = req.file;
       if (!file) {
-         return res.status(400).json({ msg: "File not set properly" });
+        return res.status(400).json({ msg: "No image file provided" });
       }
 
-      //Check if the user has already saved some data
       const user = await ProfileModel.findOne({ uid: req.uid });
 
-      if (user) {
-         if (user.resume) {
-            let oldResumeLink = user.resume.split(`${bucket.name}/`)[1];
-            await bucket.file(oldResumeLink).delete();
-         }
-         const resumeURL = file
-            ? await uploadFilesToFireBase(file, `resumes/${Date.now()}_${file.originalname}`)
-            : null;
-
-         //Save the new profile pic link
-         let response = await ProfileModel.findOneAndUpdate(
-            { uid: req.uid },
-            { resume: resumeURL },
-            { new: true }
-         );
-         res.status(200).json({ msg: "Resume updated!", profileDetails: response });
-      } else {
-         const resumeURL = file
-            ? await uploadFilesToFireBase(file, `resumes/${Date.now()}_${file.originalname}`)
-            : null;
-
-         //Save profile pic link
-         const response = await ProfileModel.create([{ uid: req.uid, resume: resumeURL }]);
-         res.status(200).json({ msg: "Resume saved", profileDetails: response });
+      // If user already has a profile pic, delete the old one from Firebase
+      if (user && user.profile) {
+        try {
+          const oldFileName = user.profile.split(`${bucket.name}/`)[1];
+          if (oldFileName) await bucket.file(oldFileName).delete();
+        } catch (err) {
+          console.log("Old file delete failed (may not exist), continuing...");
+        }
       }
-   } catch (error) {
-      console.log(error);
-      res.status(500).json({ msg: "Internal Server Error", error });
-   }
+
+      const destination = `profilePics/${Date.now()}_${file.originalname}`;
+      const profilePicURL = await uploadFilesToFireBase(file, destination);
+
+      const response = await ProfileModel.findOneAndUpdate(
+        { uid: req.uid },
+        { profile: profilePicURL },
+        { new: true, upsert: true }, // upsert: true creates it if it doesn't exist
+      );
+
+      res
+        .status(200)
+        .json({ msg: "Profile picture updated!", profileDetails: response });
+    } catch (error) {
+      console.error(error);
+      res
+        .status(500)
+        .json({ msg: "Internal Server Error during image upload" });
+    }
+  },
+);
+
+//-----------------------------Route: Upload Resume------------------------
+router.post("/resume", GetUid, upload.single("resume"), async (req, res) => {
+  try {
+    const file = req.file;
+    if (!file) {
+      return res.status(400).json({ msg: "No resume file provided" });
+    }
+
+    const user = await ProfileModel.findOne({ uid: req.uid });
+
+    // Delete old resume if it exists
+    if (user && user.resume) {
+      try {
+        const oldResumeName = user.resume.split(`${bucket.name}/`)[1];
+        if (oldResumeName) await bucket.file(oldResumeName).delete();
+      } catch (err) {
+        console.log("Old resume delete failed, continuing...");
+      }
+    }
+
+    const destination = `resumes/${Date.now()}_${file.originalname}`;
+    const resumeURL = await uploadFilesToFireBase(file, destination);
+
+    const response = await ProfileModel.findOneAndUpdate(
+      { uid: req.uid },
+      { resume: resumeURL },
+      { new: true, upsert: true },
+    );
+
+    res.status(200).json({ msg: "Resume updated!", profileDetails: response });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Internal Server Error during resume upload" });
+  }
 });
 
 module.exports = router;
