@@ -9,7 +9,7 @@ const cookieParser = require("cookie-parser");
 
 const app = express();
 // Ensure there is always a fallback port if your .env misbehaves on EC2
-const port = process.env.PORT || 3000; 
+const port = process.env.PORT || 3000;
 
 // 2. Global Safety Middlewares (MUST be declared first)
 app.use(cookieParser());
@@ -22,7 +22,7 @@ app.use(
       "https://jobnow24.vercel.app",
     ],
     credentials: true,
-  })
+  }),
 );
 
 // 3. Base/Health Test Route
@@ -51,6 +51,7 @@ app.use("/api/saveApplicants", require("./routes/jobs/Applicants"));
 
 // --- Get Requests ---
 app.use("/api/metrics", require("./routes/metrics")); // Metrics exporter injection
+app.use("/api/logs", require("./routes/logs")); // Logs exporter
 app.use("/api/getProfile/employer", require("./routes/profile/employer"));
 app.use("/api/getJobDetails", require("./routes/jobs/PerticularJob"));
 app.use("/api/getProfile/user", require("./routes/profile/user"));
