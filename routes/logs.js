@@ -2,13 +2,13 @@ const express = require("express");
 const router = express.Router();
 const fs = require("fs");
 const path = require("path");
+const { execSync } = require("child_process");
 
 // GET /api/logs
 router.get("/", (req, res) => {
-  // Path where PM2 stores the real-time standard error logs on your EC2 instance
-  const logFilePath = path.join("/home/ubuntu/.pm2/logs/job-portal-api-error.log");
+  const logFilePath = "/home/ubuntu/.pm2/logs/job-portal-api-error.log";
 
-  // Safety check: if PM2 hasn't caught any errors yet, the file won't exist
+  // Safety check: if the file doesn't exist yet, return clean
   if (!fs.existsSync(logFilePath)) {
     return res.status(200).json({
       success: true,
@@ -17,23 +17,22 @@ router.get("/", (req, res) => {
   }
 
   try {
-    // Read the file synchronously and split it by lines
-    const fileContent = fs.readFileSync(logFilePath, "utf-8");
-    const lines = fileContent.trim().split("\n");
+    // MAANG Optimization: Use native Linux 'tail' to read the last 500 lines instantly
+    // This streams data straight from the kernel instead of loading a massive file into Node memory
+    const rawLogs = execSync(`tail -n 500 ${logFilePath}`, { encoding: "utf-8" });
     
-    // Get only the last 50 lines so we don't send a massive file across the network
-    const last50Lines = lines.slice(-50);
+    // Split lines and filter out any trailing empty spaces
+    const logLines = rawLogs.trim().split("\n");
 
     return res.status(200).json({
       success: true,
-      linesCount: last50Lines.length,
-      logs: last50Lines
+      linesCount: logLines.length,
+      logs: logLines
     });
   } catch (error) {
-    console.error(error)
     return res.status(500).json({
       success: false,
-      error: "Failed to read system log stream",
+      error: "Failed to stream system log trail",
       details: error.message
     });
   }
