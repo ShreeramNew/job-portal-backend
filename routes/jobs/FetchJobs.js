@@ -15,7 +15,7 @@ router.get("/search", async (req, res) => {
       });
       res.status(200).json({ msg: "Success", jobs: resultToSend });
    } catch (error) {
-      console.log(error);
+      console.error(error);
       res.status(500).json({ msg: "Internal Server Error!" });
    }
 });
@@ -32,6 +32,7 @@ router.get("/allJobs", async (req, res) => {
       });
       res.status(200).json({ msg: "Fecthed all jobs!", jobs: resultToSend });
    } catch (error) {
+      console.error(error);
       res.status(500).json({ msg: "Internal Server Error!" });
    }
 });
@@ -64,7 +65,7 @@ router.get("/similarJobs", async (req, res) => {
 
       res.status(200).json({ msg: "Fecthed all jobs!", jobs: resultToSend });
    } catch (error) {
-      console.log(error);
+      console.error(error);
       res.status(500).json({ msg: "Internal Server Error!" });
    }
 });

@@ -18,7 +18,7 @@ router.post("/", async (req, res) => {
          await CompanyDetailsModel.create(DataToSave);
          res.status(200).json({ msg: "Success!" });
       } catch (error) {
-         console.log(error);
+         console.error(error);
          res.status(500).json({ msg: "Something went wrong" });
       }
    } else {
@@ -40,7 +40,7 @@ router.patch("/", async (req, res) => {
             );
             res.status(200).json({ msg: "Saved!", response });
          } catch (error) {
-            console.log(error);
+            console.error(error);
             res.status(500).json({ msg: "Something went wrong" });
          }
       } else {
@@ -64,7 +64,7 @@ router.get("/", async (req, res) => {
             profile: { ...response._doc, email: employerDeatilResoponse.email },
          });
       } catch (error) {
-         console.log(error);
+         console.error(error);
          res.status(500).json({ msg: "Something went wrong" });
       }
    } else {

@@ -21,7 +21,7 @@ router.get("/applicants", GetUid, async (req, res) => {
 
       res.status(200).json({ msg: "Success!", ApplicantsDetails });
    } catch (error) {
-      console.log(error);
+      console.error(error);
       res.status(500).json({ msg: "Internal Server Error" });
    }
 });
@@ -38,7 +38,7 @@ router.get("/savedApplicants", GetUid, async (req, res) => {
       );
       res.status(200).json({ msg: "Success!", ApplicantsDetails });
    } catch (error) {
-      console.log(error);
+      console.error(error);
       res.status(500).json({ msg: "Internal Server Error" });
    }
 });
@@ -54,7 +54,7 @@ router.patch("/save", GetUid, async (req, res) => {
       );
       res.status(200).json({ msg: "Success!", newResponse });
    } catch (error) {
-      console.log(error);
+      console.error(error);
       res.status(500).json({ msg: "Internal Server Error" });
    }
 });
@@ -69,7 +69,7 @@ router.patch("/unsave", GetUid, async (req, res) => {
       );
       res.status(200).json({ msg: "Success!", newResponse });
    } catch (error) {
-      console.log(error);
+      console.error(error);
       res.status(500).json({ msg: "Internal Server Error" });
    }
 });

@@ -58,6 +58,7 @@ const uploadFilesToFireBase = (file, destination) => {
         const publicUrl = `https://storage.googleapis.com/${bucket.name}/${destination}`;
         resolve(publicUrl);
       } catch (err) {
+        console.error(error);
         reject(err);
       }
     });
@@ -86,6 +87,7 @@ router.post(
           const oldFileName = user.profile.split(`${bucket.name}/`)[1];
           if (oldFileName) await bucket.file(oldFileName).delete();
         } catch (err) {
+          console.error(error);
           console.log("Old file delete failed (may not exist), continuing...");
         }
       }
@@ -103,6 +105,7 @@ router.post(
         .status(200)
         .json({ msg: "Profile picture updated!", profileDetails: response });
     } catch (error) {
+      console.error(error);
       console.error(error);
       res
         .status(500)
@@ -127,6 +130,7 @@ router.post("/resume", GetUid, upload.single("resume"), async (req, res) => {
         const oldResumeName = user.resume.split(`${bucket.name}/`)[1];
         if (oldResumeName) await bucket.file(oldResumeName).delete();
       } catch (err) {
+      console.error(error);
         console.log("Old resume delete failed, continuing...");
       }
     }

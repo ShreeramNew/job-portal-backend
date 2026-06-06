@@ -14,6 +14,7 @@ router.get("/", GetUid, async (req, res) => {
       let user = await ProfileModel.findOne({ uid });
       res.status(200).json({ msg: "Success!", user });
    } catch (error) {
+      console.error(error);
       res.status(500).json({ msg: "Internal Server Error!" });
    }
 });
@@ -24,6 +25,7 @@ router.get("/perticularUser", async (req, res) => {
       let user = await ProfileModel.findOne({ uid });
       res.status(200).json({ msg: "Success!", user });
    } catch (error) {
+      console.error(error);
       res.status(500).json({ msg: "Internal Server Error!" });
    }
 });
@@ -41,6 +43,7 @@ router.get("/checkLogedIn", GetUid, async (req, res) => {
       };
       res.status(200).json({ msg: "Success!", result });
    } catch (error) {
+      console.error(error);
       res.status(500).json({ msg: "Internal Server Error!" });
    }
 });
@@ -60,7 +63,7 @@ router.post("/", GetUid, async (req, res) => {
          });
          res.status(200).json({ msg: "Saved profile details!", profileDetails: response });
       } catch (error) {
-         console.log(error);
+         console.error(error);
          res.status(500).json({ msg: "Internal Server Error!" });
       }
    } else {

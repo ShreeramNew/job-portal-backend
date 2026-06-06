@@ -23,6 +23,7 @@ router.patch("/", GetUid, async (req, res) => {
       }
       res.status(200).json({ msg: "Success", newResponse });
    } catch (error) {
+      console.error(error);
       res.status(500).json({ msg: "Internal Server Error!" });
    }
 });

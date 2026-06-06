@@ -17,7 +17,7 @@ router.get("/", async (req, res) => {
       };
       res.status(200).json({ msg: "Suceess!", jobDetails: result });
    } catch (error) {
-      console.log(error);
+      console.error(error);
       res.status(500).json({ msg: "Internal Server Error!", error });
    }
 });
@@ -32,6 +32,7 @@ router.patch("/", getUid, async (req, res) => {
       });
       res.status(200).json({ msg: "Saved Successfully!", response });
    } catch (error) {
+      console.error(error);
       res.status(500).json({ msg: "Internal Server Error", error });
    }
 });
@@ -43,6 +44,7 @@ router.delete("/", getUid, async (req, res) => {
       let response = await JobsModel.findByIdAndDelete(jobId);
       res.status(200).json({ msg: "Deleted Successfully!", response });
    } catch (error) {
+      console.error(error);
       res.status(500).json({ msg: "Internal Server Error", error });
    }
 });

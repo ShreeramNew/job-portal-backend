@@ -36,7 +36,7 @@ router.post("/", validationTestCases, passwordHasher, async (req, res) => {
       });
       res.status(200).json({ msg: "SignUp successfull", uid: response[0]._id });
    } catch (error) {
-      console.log(error);
+      console.error(error);
       if (error.code === 11000) {
          res.status(400).json({ msg: "This email already exists" });
       } else {

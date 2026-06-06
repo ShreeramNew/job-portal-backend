@@ -20,7 +20,7 @@ router.post("/", GetUid, async (req, res) => {
       await JobModel.create(DataToSave);
       res.status(200).json({ msg: "Job Posted!" });
    } catch (error) {
-      console.log(error);
+      console.error(error);
       res.status(500).json({ msg: "Something went wrong" });
    }
 });

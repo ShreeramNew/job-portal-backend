@@ -33,7 +33,7 @@ router.post("/", validationTestCases, async (req, res) => {
          //Verify the password
          bcrypt.compare(password, response[0].password, async (err, verified) => {
             if (err) {
-               console.log(err);
+               console.error(err);
                return res.status(500).json({ msg: "Internal server error" });
             }
             if (verified) {
@@ -71,7 +71,7 @@ router.post("/", validationTestCases, async (req, res) => {
          res.status(400).json({ msg: "Invalid email!" });
       }
    } catch (error) {
-      console.log(error);
+      console.error(error);
       res.status(500).json({ msg: "Internal server error" });
    }
 });
