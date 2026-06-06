@@ -30,6 +30,7 @@ router.get("/", (req, res) => {
       logs: last50Lines
     });
   } catch (error) {
+    console.error(error)
     return res.status(500).json({
       success: false,
       error: "Failed to read system log stream",

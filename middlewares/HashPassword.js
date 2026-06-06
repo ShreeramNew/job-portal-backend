@@ -5,6 +5,7 @@ const passwordHasher=(req,res,next)=>{
         //Hash the password and replace the original password with hashed password
         bcrypt.hash(password,10,(err,hashed)=>{
             if(err){
+                console.error(err)
                 res.status(500).json({msg:"Internal Server Error"});
             }else{
                 req.body.password=hashed;
