@@ -50,6 +50,7 @@ app.use("/api/applyForJob", require("./routes/jobs/ApplyForJob"));
 app.use("/api/saveApplicants", require("./routes/jobs/Applicants"));
 
 // --- Get Requests ---
+app.use("/api/metrics", require("./routes/metrics")); // Metrics exporter injection
 app.use("/api/getProfile/employer", require("./routes/profile/employer"));
 app.use("/api/getJobDetails", require("./routes/jobs/PerticularJob"));
 app.use("/api/getProfile/user", require("./routes/profile/user"));
