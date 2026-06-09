@@ -6,6 +6,7 @@ ConnectToMongo();
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const { apmMiddleware } = require("./routes/metrics");
 
 const app = express();
 // Ensure there is always a fallback port if your .env misbehaves on EC2
@@ -24,6 +25,8 @@ app.use(
     credentials: true,
   }),
 );
+
+app.use(apmMiddleware());
 
 // 3. Base/Health Test Route
 app.get("/", (req, res) => {
