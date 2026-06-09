@@ -12,20 +12,24 @@ redisClient.connect().then(() => console.log("💾 PulseOps Memory Core: Connect
 // 🚀 MIDDLEWARE: Captures traffic and increments cloud-resilient values
 const apmMiddleware = async (req, res, next) => {
   try {
-    const start = process.hrtime.bigint();
+    // 🛡️ SAFETEY SHIELD: If the request is looking for metrics, logs, or analytics,
+    // bail out immediately so we don't count our own scraper infrastructure!
+    if (
+      req.originalUrl.includes("/api/metrics") || 
+      req.originalUrl.includes("/api/logs") ||
+      req.originalUrl.includes("/api/analytics")
+    ) {
+      return next(); 
+    }
 
-    // Increment total requests inside Redis immediately (atomic step)
-    // If the key doesn't exist, Redis automatically creates it at 1
+    const start = process.hrtime.bigint();
     await redisClient.incr("pulseops:totalRequests");
 
     res.on("finish", async () => {
       const end = process.hrtime.bigint();
       const elapsedNs = end - start;
-
-      // Add the nanoseconds spent processing this request straight into Redis
       await redisClient.incrBy("pulseops:totalResponseTimeNs", Number(elapsedNs));
 
-      // If an error code flashes, increment the error ticker inside Redis
       if (res.statusCode >= 400) {
         await redisClient.incr("pulseops:totalErrors");
       }
